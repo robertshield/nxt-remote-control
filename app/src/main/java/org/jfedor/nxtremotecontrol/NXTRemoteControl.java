@@ -59,8 +59,8 @@ import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class NXTRemoteControl extends Activity implements OnSharedPreferenceChangeListener {
-    
-    private boolean NO_BT = false; 
+
+    private boolean NO_BT = false;
     
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_CONNECT_DEVICE = 2;
@@ -75,6 +75,7 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
     private static final int MODE_TOUCHPAD = 2;
     private static final int MODE_TANK = 3;
     private static final int MODE_TANK3MOTOR = 4;
+    private static final int MODE_STEERING = 5;
     
     private BluetoothAdapter mBluetoothAdapter;
     private PowerManager mPowerManager;
@@ -330,6 +331,14 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
             return true;
         }
     }
+
+    private class SteeringOnTouchListener implements OnTouchListener {
+
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            return false;
+        }
+    }
     
     private void updateMenu(int disabled) {
         if (mMenu != null) {
@@ -337,6 +346,7 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
             mMenu.findItem(R.id.menuitem_touchpad).setEnabled(disabled != R.id.menuitem_touchpad).setVisible(disabled != R.id.menuitem_touchpad);
             mMenu.findItem(R.id.menuitem_tank).setEnabled(disabled != R.id.menuitem_tank).setVisible(disabled != R.id.menuitem_tank);
             mMenu.findItem(R.id.menuitem_tank3motor).setEnabled(disabled != R.id.menuitem_tank3motor).setVisible(disabled != R.id.menuitem_tank3motor);
+            mMenu.findItem(R.id.menuitem_steering).setEnabled(disabled != R.id.menuitem_steering).setVisible(disabled != R.id.menuitem_steering);
         }
     }
     
@@ -395,6 +405,37 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
             mTank3MotorView = (Tank3MotorView) findViewById(R.id.tank3motor);
             
             mTank3MotorView.setOnTouchListener(new Tank3MotorOnTouchListener());
+        } else if (mControlsMode == MODE_STEERING) {
+            setContentView(R.layout.main_steering);
+
+            updateMenu(R.id.menuitem_steering);
+
+            ImageButton buttonUp = (ImageButton) findViewById(R.id.button_up);
+            buttonUp.setOnTouchListener(new SteeringOnTouchListener());
+            ImageButton buttonLeft = (ImageButton) findViewById(R.id.button_left);
+            buttonLeft.setOnTouchListener(new SteeringOnTouchListener());
+            ImageButton buttonDown = (ImageButton) findViewById(R.id.button_down);
+            buttonDown.setOnTouchListener(new SteeringOnTouchListener());
+            ImageButton buttonRight = (ImageButton) findViewById(R.id.button_right);
+            buttonRight.setOnTouchListener(new SteeringOnTouchListener());
+
+            SeekBar powerSeekBar = (SeekBar) findViewById(R.id.power_seekbar);
+            powerSeekBar.setProgress(mPower);
+            powerSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress,
+                                              boolean fromUser) {
+                    mPower = progress;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
         }
         
         mStateDisplay = (TextView) findViewById(R.id.state_display);
@@ -597,6 +638,10 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
             break;
         case R.id.menuitem_tank3motor:
             mControlsMode = MODE_TANK3MOTOR;
+            setupUI();
+            break;
+        case R.id.menuitem_steering:
+            mControlsMode = MODE_STEERING;
             setupUI();
             break;
         case R.id.menuitem_settings:

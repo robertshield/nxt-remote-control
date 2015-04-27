@@ -187,6 +187,22 @@ public class NXTTalker {
     }
     
     public void motors3(byte l, byte r, byte action, boolean speedReg, boolean motorSync) {
+
+        // Format information
+        // sources: http://www.robotappstore.com/Knowledge-Base/-How-to-Control-Lego-NXT-Motors/81.html
+        //          http://www.lejos.org/p_technologies/nxt/nxj/api/lejos/nxt/comm/NXTCommand.html
+        //          https://code.google.com/p/smart-robot/downloads/detail?name=Appendix%202-LEGO%20MINDSTORMS%20NXT%20Direct%20commands.pdf&can=2&q=
+        //
+        // Byte 0-1: Command length LSB first.
+        // Byte 2: Command type- direct command. For direct command with response message use 0x00, otherwise, for direct command without the reply message, use 0x80.
+        // Byte 3: Command- set motor output state.
+        // Byte 4: Motor output port. See explanation for motor output port below.
+        // Byte 5: Motor power set point. See explanation for motor power set point below.
+        // Byte 6: Motor mode byte (bit field). See explanation for motor byte below.
+        // Byte 7: Regulation mode. It is valid only when the motor mode is regulated, otherwise use 0x00 value. See explanation for regulation mode below.
+        // Byte 8: Turn ratio. It is valid only when using a motors synchronization regulation mode, otherwise use 0x00 value. See explanation for a turn ratio below.
+        // Byte 9: Run state. See explanation for Run state below.
+        // Byte 10-13: Tacho limit LSB first. Valid only when using a ramp-up or ramp-down as a Run state, otherwise use 0x00 value. See explanation for tacho limit below.
         byte[] data = { 0x0c, 0x00, (byte) 0x80, 0x04, 0x02, 0x32, 0x07, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
                         0x0c, 0x00, (byte) 0x80, 0x04, 0x01, 0x32, 0x07, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
                         0x0c, 0x00, (byte) 0x80, 0x04, 0x00, 0x32, 0x07, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00 };
