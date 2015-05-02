@@ -334,9 +334,40 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
 
     private class SteeringOnTouchListener implements OnTouchListener {
 
+        public static final int LEFT = 0;
+        public static final int RIGHT = 1;
+        public static final int FORWARD = 2;
+        public static final int REVERSE = 3;
+
+        private int mDirection;
+
+        public SteeringOnTouchListener(int direction) {
+            mDirection = direction;
+        }
+
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            return false;
+            //Log.i("NXT", "onTouch event: " + Integer.toString(event.getAction()));
+            int action = motionEvent.getAction();
+
+            byte power = 0;
+            boolean steering = (mDirection == LEFT || mDirection == RIGHT);
+
+            if (action == MotionEvent.ACTION_DOWN) {
+                power = (byte)(steering ? 50 : 100);
+                if (mReverse)
+                    power *= -1;
+                if (mDirection == RIGHT || mDirection == REVERSE)
+                    power *= -1;
+            }
+
+            if (steering) {
+                mNXTTalker.motor((byte)0x0, power, true, true);
+            } else {
+                mNXTTalker.motors(power, power, true, true);
+            }
+
+            return true;
         }
     }
     
@@ -411,13 +442,16 @@ public class NXTRemoteControl extends Activity implements OnSharedPreferenceChan
             updateMenu(R.id.menuitem_steering);
 
             ImageButton buttonUp = (ImageButton) findViewById(R.id.button_up);
-            buttonUp.setOnTouchListener(new SteeringOnTouchListener());
+            buttonUp.setOnTouchListener(new SteeringOnTouchListener(SteeringOnTouchListener.FORWARD));
+
             ImageButton buttonLeft = (ImageButton) findViewById(R.id.button_left);
-            buttonLeft.setOnTouchListener(new SteeringOnTouchListener());
+            buttonLeft.setOnTouchListener(new SteeringOnTouchListener(SteeringOnTouchListener.LEFT));
+
             ImageButton buttonDown = (ImageButton) findViewById(R.id.button_down);
-            buttonDown.setOnTouchListener(new SteeringOnTouchListener());
+            buttonDown.setOnTouchListener(new SteeringOnTouchListener(SteeringOnTouchListener.REVERSE));
+
             ImageButton buttonRight = (ImageButton) findViewById(R.id.button_right);
-            buttonRight.setOnTouchListener(new SteeringOnTouchListener());
+            buttonRight.setOnTouchListener(new SteeringOnTouchListener(SteeringOnTouchListener.RIGHT));
 
             SeekBar powerSeekBar = (SeekBar) findViewById(R.id.power_seekbar);
             powerSeekBar.setProgress(mPower);
